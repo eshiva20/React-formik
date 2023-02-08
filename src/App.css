@@ -8,18 +8,27 @@ form label{
 }
 .form-elem{
   padding: 10px 0px;
+  margin: 5px 0px;
 }
-input{
-  font-size: 1.5rem;
+.address{
+  display: flex;
+  flex-direction: column;
+}
+input,.add-field{
+  font-size:1.5rem; 
   display: flex;
   flex-direction: column;
   width: 400px;
   margin: 5px 0px 0px 0px ;
-  padding: 8px 3px ;
+  padding: 8px 6px ;
 }
 
 form button{
   font-size: 1.2rem;
   margin: 13px 0px ;
   padding: 8px 10px;
+}
+.red{
+  color: red;
+   font-size: 15px
 }

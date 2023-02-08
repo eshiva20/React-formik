@@ -1,113 +1,134 @@
+import React from "react";
 import "./App.css";
-import { useFormik } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import ErrorMsg from "./ErrorMsg";
 
 const initialValues = {
   name: "",
   email: "",
   contact: "",
+  address: "",
 };
 
 const onSubmit = (values) => {
-  console.log("values", values);
+  console.log("Form data", values);
 };
 
-const validate = (values) => {
-  let error = {};
-  if (!values.name) {
-    error.name = "Name required";
-  }
-  else if(values.name.length<3 ||   values.name.length>10 ){
-    error.name="length should be between 3-10"
-  }
+//-------------Befor Yup----------------------
+// const validate = values => {
+//   const errors = {}
 
-  if (!values.email) {
-    error.email = "Email required";
-  } else if (
-    !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(values.email)
-  ) {
-    error.email = "Invalid email format";
-  }
+//   if (!values.name) {
+//     errors.name = 'Required'
+//   }
 
-  if (!values.contact) {
-    error.contact = "contact required";
-  } else if (isNaN(values.contact)) {
-    error.contact = "Enter Number Only";
-    console.log(values.contact.length)
-  }else if(values.contact.length != 10){
-    error.contact = "Enter correct contact Number";
-  }
-  return error;
-};
+//   if (!values.email) {
+//     errors.email = 'Required'
+//   } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
+//     errors.email = 'Invalid email format'
+//   }
+
+//   if (!values.contact) {
+//     errors.contact = 'Required'
+//   }
+
+//   return errors
+// }
+//--------------------------------------------------
+
+const nameRegExp = /^[A-Za-z ]*$/;
+const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
+
+const validationSchema = Yup.object({
+  name: Yup.string()
+    .min(3)
+    .max(10)
+    .matches(nameRegExp, "Please enter valid name")
+    .required("Required"),
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Required"),
+  contact: Yup.string()
+    .required("required")
+    .matches(phoneRegExp, "Phone number is not valid")
+    .min(10, "too short")
+    .max(10, "too long"),
+  address: Yup.string()
+    .min(10, "Min 10 char Required")
+    .max(50, "Max 50 char allowed")
+    .required("Required"),
+});
 
 function App() {
-  const formik = useFormik({
-    initialValues,
-    onSubmit,
-    validate,
-  });
-
-  // console.log("formik values",formik.values)
-  // console.log("errors", formik.errors);
-
-  console.log("visited", formik.touched)
+  //------------- Before Re-Factoring-------------
+  // const formik = useFormik({
+  //   initialValues,
+  //   onSubmit,
+  //   // validate,
+  //   validationSchema,
+  // });
+  // ---------------------------------------------
 
   return (
-    <div className="main">
-      <form onSubmit={formik.handleSubmit} className="form">
-        <div className="form-elem">
-          <label htmlFor="name">Name</label>
-          <input
-            onChange={formik.handleChange}
-            value={formik.values.name}
-            className="name"
-            name="name"
-            type="text"
-            onBlur={formik.handleBlur}
-            autoComplete="off"
-          />
-          {formik.touched.name && formik.errors.name ? (
-            <h1 style={{ color: "red", fontSize: "15px" }}>
-              {formik.errors.name}
-            </h1>
-          ) : null}
-        </div>
-        <div className="form-elem">
-          <label htmlFor="email">Email</label>
-          <input
-            onChange={formik.handleChange}
-            value={formik.values.email}
-            className="email"
-            name="email"
-            type="email"
-            autoComplete="off"
-            onBlur={formik.handleBlur}
-          />
-          {formik.touched.email &&formik.errors.email ? (
-            <h1 style={{ color: "red", fontSize: "15px" }}>
-              {formik.errors.email}
-            </h1>
-          ) : null}
-        </div>
-        <div className="form-elem">
-          <label htmlFor="contact">Contact</label>
-          <input
-            onChange={formik.handleChange}
-            value={formik.values.contact}
-            className="contact"
-            name="contact"
-            type="contact"
-            autoComplete="off"
-            onBlur={formik.handleBlur}
-          />
-          {formik.touched.contact && formik.errors.contact ? (
-            <h1 style={{ color: "red", fontSize: "15px" }}>
-              {formik.errors.contact}
-            </h1>
-          ) : null}
-        </div>
-        <button type="submit">Submit</button>
-      </form>
-    </div>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={onSubmit}
+      validationSchema={validationSchema}
+    >
+      <div className="main">
+        <Form className="form">
+          <div className="form-elem">
+            <label htmlFor="name">Name</label>
+            <Field
+              type="text"
+              name="name"
+              autoComplete="off"
+              placeholder="Name"
+            />
+            <ErrorMessage component={ErrorMsg} name="name" />
+          </div>
+
+          <div className="form-elem">
+            <label htmlFor="email">E-mail</label>
+            <Field
+              type="email"
+              name="email"
+              autoComplete="off"
+              placeholder="Email id"
+            />
+            <ErrorMessage component={ErrorMsg} name="email" />
+          </div>
+
+          <div className="form-elem">
+            <label htmlFor="contact">Contact</label>
+            <Field
+              type="text"
+              name="contact"
+              autoComplete="off"
+              placeholder="Contact"
+            />
+            <ErrorMessage component={ErrorMsg} class="err" name="contact" />
+          </div>
+
+          <div className="form-elem address">
+            <label htmlFor="address">Address</label>
+            <Field
+              as="textarea"
+              className="add-field"
+              name="address"
+              autoComplete="off"
+              placeHolder="Address"
+            >{
+              (props)=>{console.log(props)}
+            }</Field>
+            <ErrorMessage component={ErrorMsg} class="err" name="address" />
+          </div>
+
+          <button type="submit">Submit</button>
+        </Form>
+      </div>
+    </Formik>
   );
 }
 
