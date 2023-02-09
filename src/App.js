@@ -1,14 +1,27 @@
 import React from "react";
 import "./App.css";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import {
+  Formik,
+  Form,
+  Field,
+  ErrorMessage,
+  FieldArray,
+  FastField,
+} from "formik";
 import * as Yup from "yup";
 import ErrorMsg from "./ErrorMsg";
 
 const initialValues = {
   name: "",
   email: "",
-  contact: "",
+  contact: ["", ""],
   address: "",
+  about: "",
+  social: {
+    facebook: "",
+    instagram: "",
+  },
+  skills: [""],
 };
 
 const onSubmit = (values) => {
@@ -49,15 +62,14 @@ const validationSchema = Yup.object({
   email: Yup.string()
     .email("Invalid email format")
     .required("Required"),
-  contact: Yup.string()
-    .required("required")
-    .matches(phoneRegExp, "Phone number is not valid")
-    .min(10, "too short")
-    .max(10, "too long"),
   address: Yup.string()
     .min(10, "Min 10 char Required")
     .max(50, "Max 50 char allowed")
     .required("Required"),
+  about: Yup.string()
+    .min(10, "min 10 chars required")
+    .max(50)
+    .required("required"),
 });
 
 function App() {
@@ -97,18 +109,31 @@ function App() {
               autoComplete="off"
               placeholder="Email id"
             />
-            <ErrorMessage component={ErrorMsg} name="email" />
+            <ErrorMessage name="email">
+              {(props) => <h1 className="red">{props}</h1>}
+            </ErrorMessage>
           </div>
 
           <div className="form-elem">
-            <label htmlFor="contact">Contact</label>
+            <label htmlFor="primary">Primary Contact</label>
             <Field
               type="text"
-              name="contact"
+              name="contact[0]"
               autoComplete="off"
-              placeholder="Contact"
+              placeholder="Primary Contact"
             />
-            <ErrorMessage component={ErrorMsg} class="err" name="contact" />
+            <ErrorMessage component={ErrorMsg} class="err" name="primary" />
+          </div>
+
+          <div className="form-elem">
+            <label htmlFor="secondary">Secondary Contact</label>
+            <Field
+              type="text"
+              name="contact[1]"
+              autoComplete="off"
+              placeholder="Secondary Contact"
+            />
+            <ErrorMessage component={ErrorMsg} class="err" name="secondary" />
           </div>
 
           <div className="form-elem address">
@@ -118,11 +143,83 @@ function App() {
               className="add-field"
               name="address"
               autoComplete="off"
-              placeHolder="Address"
-            >{
-              (props)=>{console.log(props)}
-            }</Field>
-            <ErrorMessage component={ErrorMsg} class="err" name="address" />
+              placeholder="Address"
+            />
+            <ErrorMessage class="err" name="address">
+              {(errMsg) => <h1 className="red">{errMsg}</h1>}
+            </ErrorMessage>
+          </div>
+
+          <div className="form-elem">
+            <label htmlFor="about">About YourSelf</label>
+            <FastField name="about">
+              {(props) => {
+                const { field, meta } = props;
+                console.log("about rendered");
+                return (
+                  <div>
+                    <input
+                      placeholder="Describe Yourself"
+                      name="about"
+                      type="textarea"
+                      {...field}
+                    />
+                    {meta.touched && meta.error ? (
+                      <h1 className="red">{meta.error}</h1>
+                    ) : null}
+                  </div>
+                );
+              }}
+            </FastField>
+          </div>
+
+          <div className="form-elem">
+            <label htmlFor="facebook">Facebook url</label>
+            <Field type="text" name="social.facebook" />
+          </div>
+
+          <div className="form-elem">
+            <label htmlFor="intagram">instagram url</label>
+            <Field type="text" name="social.instagram" />
+          </div>
+
+          <div className="form-elem">
+            <label htmlFor="skills">Skills</label>
+            <FieldArray name="skills">
+              {(fieldArrayProps) => {
+                const { push, remove, form } = fieldArrayProps;
+                const { values } = form;
+                const { skills } = values;
+                return (
+                  <div>
+                    {skills.map((elem, index) => (
+                      <div key={index}>
+                        <Field
+                          name={`skills[${index}]`}
+                          style={{ width: "350px", display: "inline" }}
+                        />
+                        {index > 0 && (
+                          <button
+                            style={{ padding: "3px 10px", fontSize: "30px" }}
+                            type="button"
+                            onClick={() => remove(index)}
+                          >
+                            -
+                          </button>
+                        )}
+                        <button
+                          style={{ padding: "3px 10px", fontSize: "30px" }}
+                          type="button"
+                          onClick={() => push(" ")}
+                        >
+                          +
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }}
+            </FieldArray>
           </div>
 
           <button type="submit">Submit</button>
